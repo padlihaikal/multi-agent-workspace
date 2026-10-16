@@ -1,13 +1,6 @@
-from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from llm import ask
-
-class State (TypedDict):
-    task: str
-    plan: str
-    review: str
-    result: str
-    attempts: int
+from state import State
 
 def planner(state: State) -> dict:
     system_prompt = "You are a planner. Create a short plan in 2-3 steps."
