@@ -1,61 +1,7 @@
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import StateGraph, START
 from state import State
-from llm import ask
+from supervisor import supervisor_llm
 from agents import planner, worker, reviewer
-
-MAX_ATTEMPTS = 3
-
-def supervisor (state: State) -> str:
-    plan = state.get("plan")
-    result = state.get("result")
-    review = state.get("review")
-    attempts = state.get("attempts", 0)
-
-    if not plan:
-        return ("planner")
-    elif not result:
-        return ("worker")
-    elif not review:
-        return ("review")
-    elif review .startswith ("REVISE") and attempts < MAX_ATTEMPTS:
-        return ("worker")
-    else:
-        return END
-
-def supervisor_llm(state:State) -> str:
-    system_prompt = (
-        "Choose exactly one: planner, worker, review or FINISH. "
-        "If plan is missing, choose planner. "
-        "If plan exists but result is missing, choose worker. "
-        "If plan and result exists but review is missing, choose review. "
-        "If all exist, choose FINISH. "
-        "Reply with one word only. "
-    )
-    user_prompt = (
-        f"Task: {state.get('task', '')}\n"
-        f"Plan: {state.get('plan', '')}\n"
-        f"Result: {state.get('result', '')}\n"
-        f"Review: {state.get('review', '')}"
-    )
-    try:
-        source = ask(system_prompt, user_prompt)
-        source_result = source.strip().lower()
-        
-        if source_result == "finish":
-            source_result = END
-
-        expected = supervisor(state)
-
-        if source_result != expected:
-            print(f"LLM routing rejected: {source_result}. Using fallback: {expected}")
-            source_result = expected
-        
-    except Exception as e :
-        print(f"LLM error: {e}")
-        #print("LLM error, falling back to Python rules")
-        return supervisor(state)
-
-    return source_result
 
 builder = StateGraph(State)
 builder.add_node("planner", planner)
