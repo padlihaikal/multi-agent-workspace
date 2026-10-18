@@ -40,10 +40,15 @@ def supervisor_llm(state:State) -> str:
     try:
         source = ask(system_prompt, user_prompt)
         source_result = source.strip().lower()
-        print(f"Supervisor chose: {source_result}")
-
+        
         if source_result == "finish":
             source_result = END
+
+        expected = supervisor(state)
+
+        if source_result != expected:
+            print(f"LLM routing rejected: {source_result}. Using fallback: {expected}")
+            source_result = expected
         
     except Exception as e :
         print(f"LLM error: {e}")
