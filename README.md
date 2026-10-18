@@ -9,6 +9,7 @@ A multi-agent workflow built with LangGraph. A planner creates a plan, a worker 
 - Python rule guard: LLM routing that contradicts the state is rejected
 - Fallback to rule-based routing when the LLM call fails
 - Revision loop: reviewer replies `APPROVED` or `REVISE`, with a maximum of 3 attempts
+- Automatic retry (up to 3 attempts) for failed LLM calls
 
 ## Tech Stack
 - Python
@@ -65,7 +66,7 @@ The first line shows the rule guard correcting a wrong LLM routing choice. The l
 
 ## Future Improvement
 - Make it interactive with a Q&A flow
-- Improve handling of API key errors
+- Fail fast on invalid API key errors instead of retrying
 - Extend the rule-based supervisor (currently it only returns planner, worker, review, and END)
 - Teach the supervisor prompt the `REVISE` rule
 
